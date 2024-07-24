@@ -1,0 +1,3 @@
+echo "Runnig black..."  
+black /home/pi/datalogger-ppk/
+python3 -m isort .
