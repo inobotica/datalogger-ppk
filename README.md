@@ -17,7 +17,8 @@ pip install isort --break-system-packages
 sudo apt-get install sqlite3
 
 # python libraries
-pip install sqlalchemy  --break-system-packages
+pip install sqlalchemy --break-system-packages
+pip install pyubx2 --break-system-packages
 
 # Create database 
 sqlite3 /home/pi/datalogger-ppk/database/datalogger.db
