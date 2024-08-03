@@ -1,10 +1,13 @@
+from models import Datalogs
 from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import sessionmaker
-from models import Datalogs
+
 
 class Database:
     def __init__(self) -> None:
-        self.engine = create_engine(f"sqlite:////home/pi/datalogger-ppk/database/datalogger.db")
+        self.engine = create_engine(
+            f"sqlite:////home/pi/datalogger-ppk/database/datalogger.db"
+        )
         self.session_maker = sessionmaker()
         self.session_maker.configure(bind=self.engine)
         self.session = self.session_maker()
@@ -28,10 +31,11 @@ class Database:
 
     def test_connection(self):
         statement = self.session.execute(select(Datalogs))
-        
+
         res = statement.scalars().all()
         for row in res:
             print(row.start, row.end)
+
 
 if __name__ == "__main__":
     print("starting database")
