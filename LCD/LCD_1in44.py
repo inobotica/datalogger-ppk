@@ -27,8 +27,9 @@
 
 import time
 
-import config
 import numpy as np
+
+from . import config
 
 LCD_1IN44 = 1
 LCD_1IN8 = 0

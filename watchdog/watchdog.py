@@ -36,4 +36,4 @@ class Status:
 if __name__ == "__main__":
     usb = Status()
     usb.check_status()
-    print(usb)
+    print("status", usb)

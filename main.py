@@ -8,18 +8,9 @@ from watchdog.watchdog import Status
 
 
 # Status thread class
-class StatusThread(threading.Thread):
+class ObjThread(threading.Thread):
     def __init__(self, obj, *args, **kwargs):
-        super(StatusThread, self).__init__(*args, **kwargs)
-        self.obj = obj
-
-    def run(self):
-        self.obj.start()
-
-
-class LCDThread(threading.Thread):
-    def __init__(self, obj, *args, **kwargs):
-        super(StatusThread, self).__init__(*args, **kwargs)
+        super(ObjThread, self).__init__(*args, **kwargs)
         self.obj = obj
 
     def run(self):
@@ -27,11 +18,11 @@ class LCDThread(threading.Thread):
 
 
 status = Status()
-status_thread = StatusThread(obj=status, name="StatusThread")
+status_thread = ObjThread(obj=status, name="StatusThread")
 status_thread.start()
 
 lcd = LCD(status)
-lcd_thread = LCDThread(obj=lcd, name="LCDThread")
+lcd_thread = ObjThread(obj=lcd, name="LCDThread")
 lcd_thread.start()
 
 while True:

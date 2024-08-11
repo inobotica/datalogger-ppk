@@ -2,8 +2,9 @@
 import subprocess
 import time
 
-import LCD_1in44
 from PIL import Image, ImageColor, ImageDraw, ImageFont
+
+from . import LCD_1in44
 
 
 class LCD:
@@ -22,6 +23,7 @@ class LCD:
         # Get drawing object to draw on image.
         self.draw = ImageDraw.Draw(self.image)
         self.font = ImageFont.load_default()
+        # self.font = ImageFont.truetype("DejaVuSans-Bold.ttf", 10)
 
         # Draw a black filled box to clear the image.
         self.draw.rectangle(
@@ -38,10 +40,32 @@ class LCD:
             self.draw.text(
                 (10, 10),
                 "GPS",
-                font=lcd.font,
+                font=self.font,
                 fill="green" if self.state.gps else "red",
             )
-            self.disp.LCD_ShowImage(lcd.image, 0, 0)
+
+            self.draw.text(
+                (40, 10),
+                "CAM",
+                font=self.font,
+                fill="green" if self.state.camera else "red",
+            )
+
+            self.draw.text(
+                (70, 10),
+                "USB",
+                font=self.font,
+                fill="green" if self.state.media else "red",
+            )
+
+            self.draw.text(
+                (self.wifi_x_pos, self.wifi_y_pos),
+                "IP: " + self.state.wifi,
+                font=self.font,
+                fill="white",
+            )
+
+            self.disp.LCD_ShowImage(self.image, 0, 0)
             time.sleep(0.1)
 
     def get_ip(self):
