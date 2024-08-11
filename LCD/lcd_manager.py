@@ -65,6 +65,12 @@ class LCD:
                 fill="white",
             )
 
+            self.draw.ellipse(
+                (110, 110, 120, 120),
+                outline="black",
+                fill="green" if int(time.time()) % 2 else "black",
+            )  # A button
+
             self.disp.LCD_ShowImage(self.image, 0, 0)
             time.sleep(0.1)
 
