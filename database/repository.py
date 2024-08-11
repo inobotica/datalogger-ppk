@@ -1,4 +1,4 @@
-from models import Datalogs
+from models import Datalogs, datalogs_table
 from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import sessionmaker
 
