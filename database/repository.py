@@ -1,6 +1,10 @@
-from models import Datalogs, datalogs_table
+import os
+from datetime import datetime, timezone
+
 from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import sessionmaker
+
+from .models import Datalogs, datalogs_table
 
 
 class Database:
@@ -12,9 +16,17 @@ class Database:
         self.session_maker.configure(bind=self.engine)
         self.session = self.session_maker()
 
-    def insert_log(self):
-        self.session.add(Datalogs(state=False))
+    def insert_data(self, db_obj):
+        self.session.add(db_obj)
         self.session.commit()
+
+    def insert_log(self):
+        self.base_dir = "/home/pi/datalogger-ppk/logs"
+        self.filename = datetime.now(timezone.utc).strftime("%y%m%d_%H%M%S") + ".ubx"
+        self.filepath = os.path.join(self.base_dir, self.filename)
+        db_obj = Datalogs(filename=self.filepath)
+        self.insert_data(db_obj)
+        return db_obj
 
     def get_log(self, orm_model, condition):
         # query for ``User`` objects

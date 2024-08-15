@@ -12,10 +12,9 @@ datalogs_table = Table(
     "datalogs",
     mapper_registry.metadata,
     Column("id", Integer, primary_key=True),
-    Column("start", DateTime(timezone=True), server_default=func.utcnow()),
-    Column("end", DateTime(timezone=True), onupdate=func.utcnow()),
+    Column("time", DateTime(timezone=True), server_default=func.utcnow()),
     Column("filename", String),
-    Column("state", Boolean, server_default=sa.sql.true()),
+    Column("state", Boolean, server_default=sa.sql.false()),
 )
 
 
