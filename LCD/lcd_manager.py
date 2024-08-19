@@ -36,6 +36,8 @@ class LCD:
         self.wifi_circle_width = 10
 
     def start(self):
+        print("Starting LCD Thread...")
+
         while True:
             self.draw.text(
                 (10, 10),
@@ -58,6 +60,18 @@ class LCD:
                 fill="green" if self.state.media else "red",
             )
 
+            log_status = "LOG: " + (
+                self.state.db_log.filename[-10:] if self.state.db_log else "EN ESPERA"
+            )
+            print("LOG status", log_status)
+
+            self.draw.text(
+                (10, 30),
+                log_status,
+                font=self.font,
+                fill="white",
+            )
+
             self.draw.text(
                 (self.wifi_x_pos, self.wifi_y_pos),
                 "IP: " + self.state.wifi,
@@ -65,10 +79,11 @@ class LCD:
                 fill="white",
             )
 
+            color = "red" if self.state.db_log else "green"
             self.draw.ellipse(
                 (110, 110, 120, 120),
                 outline="black",
-                fill="green" if int(time.time()) % 2 else "black",
+                fill=color if int(time.time()) % 2 else "black",
             )  # A button
 
             self.disp.LCD_ShowImage(self.image, 0, 0)

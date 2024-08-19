@@ -7,7 +7,7 @@ import RPi.GPIO as GPIO
 
 
 class Keypad:
-    def __init__(self, database) -> None:
+    def __init__(self, database, status) -> None:
         self.KEY_UP_PIN = 6
         self.KEY_DOWN_PIN = 19
         self.KEY_LEFT_PIN = 5
@@ -20,7 +20,7 @@ class Keypad:
         self.BOUNCE_TIME = 500
 
         self.database = database
-        self.log = None
+        self.status = status
 
         # Keys setup
         GPIO.setmode(GPIO.BCM)
@@ -97,14 +97,14 @@ class Keypad:
         if channel == self.KEY1_PIN:
             print("key1")
 
-            if not self.log:
-                self.log = self.database.insert_log()
-                print("saving log into:", self.log.filename)
+            if not self.status.db_log:
+                self.status.db_log = self.database.insert_log()
+                print("saving log into:", self.status.db_log.filename)
             else:
                 print("updating log...")
-                self.log.state = True
+                self.status.db_log.state = True
                 self.database.session.commit()
-                self.log = None
+                self.status.db_log = None
 
         elif channel == self.KEY2_PIN:
             print("key2")
@@ -127,6 +127,7 @@ class Keypad:
             print("press")
 
     def start(self):
+        print("Starting Keypad Thread...")
 
         while True:
             time.sleep(0.1)

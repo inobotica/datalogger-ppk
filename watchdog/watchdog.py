@@ -4,6 +4,7 @@ import time
 
 class Status:
     def __init__(self):
+        self.db_log = None
         self.camera = False
         self.media = False
         self.gps = False
@@ -25,6 +26,8 @@ class Status:
         self.wifi = IP
 
     def start(self):
+        print("Starting Status Thread...")
+
         while True:
             self.check_status()
             time.sleep(0.2)
