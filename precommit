@@ -1,0 +1,6 @@
+echo "Running black..."
+black /home/pi/datalogger-ppk/
+echo "Running isort..."
+python3 -m isort .
+#echo "Running pylint..."
+#pylint $(git ls-files '*.py')
