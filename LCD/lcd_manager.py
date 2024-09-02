@@ -19,6 +19,7 @@ class LCD:
 
         # Create blank image for drawing.
         self.image = Image.new("RGB", (self.disp.width, self.disp.height))
+        self.image.rotate(180)
 
         # Get drawing object to draw on image.
         self.draw = ImageDraw.Draw(self.image)

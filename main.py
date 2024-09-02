@@ -3,6 +3,7 @@ import os
 import threading
 import time
 
+from camera.camera import Camera
 from database.repository import Database
 from gps.gps_manager import GPS
 from keypad.keypad import Keypad
@@ -37,6 +38,10 @@ keypad_thread.start()
 gps = GPS(status)
 gps_thread = ObjThread(obj=gps, name="GPSThread")
 gps_thread.start()
+
+camera = Camera(status)
+camera_thread = ObjThread(obj=camera, name="CameraThread")
+camera_thread.start()
 
 while True:
     time.sleep(0.01)
