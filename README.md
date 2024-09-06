@@ -22,3 +22,14 @@ pip install pyubx2 --break-system-packages
 
 # Create database 
 sqlite3 /home/pi/datalogger-ppk/database/datalogger.db
+
+# clone imu library
+```sh
+git clone https://github.com/niru-5/imusensor.git
+cd imusensor
+pip install . --break-system-packages
+```
+
+
+# Check i2c port
+sudo i2cdetect -y 1

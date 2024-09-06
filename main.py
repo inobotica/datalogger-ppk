@@ -6,6 +6,7 @@ import time
 from camera.camera import Camera
 from database.repository import Database
 from gps.gps_manager import GPS
+from imu.imu_manager import IMUSensor
 from keypad.keypad import Keypad
 from LCD.lcd_manager import LCD
 from watchdog.watchdog import Status
@@ -42,6 +43,10 @@ gps_thread.start()
 camera = Camera(status)
 camera_thread = ObjThread(obj=camera, name="CameraThread")
 camera_thread.start()
+
+imu_sensor = IMUSensor(status)
+imu_sensor = ObjThread(obj=imu_sensor, name="IMUThread")
+imu_sensor.start()
 
 while True:
     time.sleep(0.01)

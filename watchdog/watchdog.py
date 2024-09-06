@@ -9,6 +9,7 @@ class Status:
         self.media = False
         self.gps = False
         self.wifi = False
+        self.imu = None
 
     def check_status(self):
         cmd = "lsusb | grep -i -v hub"
