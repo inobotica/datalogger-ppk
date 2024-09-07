@@ -64,7 +64,6 @@ class LCD:
             log_status = "LOG: " + (
                 self.state.db_log.filename[-10:] if self.state.db_log else "EN ESPERA"
             )
-            print("LOG status", log_status)
 
             self.draw.text(
                 (10, 30),

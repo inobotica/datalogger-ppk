@@ -59,13 +59,13 @@ class IMUSensor:
                 )
             else:
                 self.status.imu = self.sensorfusion
-                print(
-                    "Kalmanroll:{0} KalmanPitch:{1} KalmanYaw:{2} ".format(
-                        int(self.sensorfusion.roll),
-                        int(self.sensorfusion.pitch),
-                        int(self.sensorfusion.yaw),
-                    )
-                )
+                # print(
+                #     "Kalmanroll:{0} KalmanPitch:{1} KalmanYaw:{2} ".format(
+                #         int(self.sensorfusion.roll),
+                #         int(self.sensorfusion.pitch),
+                #         int(self.sensorfusion.yaw),
+                #     )
+                # )
 
             time.sleep(0.01)
 

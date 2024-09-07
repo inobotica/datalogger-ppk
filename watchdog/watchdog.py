@@ -2,6 +2,26 @@ import subprocess
 import time
 
 
+class Photo:
+    def __init__(self) -> None:
+        self.name = ""
+        self.count = 0
+
+    @property
+    def count(self):
+        return self._count
+
+    @count.setter
+    def count(self, current_count):
+        self._count = int(current_count)
+        self.name = f"DSC{self._count:05}.JPG"
+
+    def increase_count(self):
+        self.count += 1
+        self.name = f"DSC{self._count:05}.JPG"
+        return self.name
+
+
 class Status:
     def __init__(self):
         self.db_log = None
@@ -10,6 +30,7 @@ class Status:
         self.gps = False
         self.wifi = False
         self.imu = None
+        self.photo = Photo()
 
     def check_status(self):
         cmd = "lsusb | grep -i -v hub"

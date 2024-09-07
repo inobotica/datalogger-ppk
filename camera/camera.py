@@ -11,10 +11,9 @@ class Camera:
         self.state = state
         self.camera_name = None
         self.settings = None
-        self.photo_count = None
-        self.releaseCamera()
-        self.camera = gp.Camera()
-        self.camera.init()
+        # self.releaseCamera()
+        # self.camera = gp.Camera()
+        # self.camera.init()
 
     def get_summary(self) -> None:
         text = self.camera.get_summary()
@@ -80,23 +79,61 @@ class Camera:
         print("Camera file path: {0}/{1}".format(file_path.folder, file_path.name))
         print("GPHOTO Ellapsed time(ms):", int(1000 * (time.time() - ti)))
 
+    def capture_image_cmd(self):
+        if not self.state.camera:
+            return False
+
+        print("Taking photo...")
+
+        image_path = "/home/pi/datalogger-ppk/camera/image.log"
+        f = open(image_path, "w")
+        f.close()
+
+        cmd = [
+            "gphoto2",
+            "--debug",
+            "--debug-loglevel=data",
+            f"--debug-logfile={image_path}",
+            "--wait-event=3s",
+            "--capture-image",
+        ]
+        subprocess.run(cmd, capture_output=True, text=True)
+
+        lines = open(image_path).readlines()
+        name = None
+
+        for index in range(10000, len(lines)):
+            line = lines[index].strip()
+
+            if "D.S.C." in line:
+                name = line
+                break
+
+        if name:
+            print("PTP line", name)
+            count = name[name.index("D.S.C.") + 6 :].replace(".", "")
+            self.state.photo.count = count
+            print("Photo taken:", self.state.photo.name)
+            return True
+
+        return False
+
     def trigger_capture(self):
-        # ti = time.time()
-        gp.gp_camera_trigger_capture(self.camera)
-        # print("GPHOTO Ellapsed time(ms):", int(1000 * (time.time() - ti)))
+        if not self.state.photo.count:
+            self.capture_image_cmd()
+            time.sleep(10)
+
+        if self.state.camera:
+            self.state.photo.increase_count()
+            gp.gp_camera_trigger_capture(self.camera)
+            print("photo", self.state.photo.name)
 
     def trigger_capture_cmd(self):
-        ti = time.time()
-
-        try:
-            fastCapture = ["gphoto2", "--trigger-capture"]
-            subprocess.run(
-                fastCapture, check=True, stdout=subprocess.PIPE, universal_newlines=True
-            )
-        except subprocess.CalledProcessError:
-            print("Error")
-
-        print("CMD Ellapsed time(ms):", int(1000 * (time.time() - ti)))
+        if self.state.camera:
+            self.state.photo.increase_count()
+            cmd = ["gphoto2", "--trigger-capture"]
+            subprocess.run(cmd, capture_output=True, text=True)
+            print("photo", self.state.photo.name)
 
     def start(self):
         last_shot = int(1000 * time.time())
@@ -106,8 +143,9 @@ class Camera:
             delta = int(1000 * time.time()) - last_shot
 
             if self.state.camera and self.state.db_log and delta >= 2500:
+                print("delta", delta)
                 last_shot = int(1000 * time.time())
-                self.trigger_capture()
+                self.trigger_capture_cmd()
 
 
 if __name__ == "__main__":

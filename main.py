@@ -32,10 +32,6 @@ lcd = LCD(status)
 lcd_thread = ObjThread(obj=lcd, name="LCDThread")
 lcd_thread.start()
 
-keypad = Keypad(db, status)
-keypad_thread = ObjThread(obj=keypad, name="KeypadThread")
-keypad_thread.start()
-
 gps = GPS(status)
 gps_thread = ObjThread(obj=gps, name="GPSThread")
 gps_thread.start()
@@ -43,6 +39,10 @@ gps_thread.start()
 camera = Camera(status)
 camera_thread = ObjThread(obj=camera, name="CameraThread")
 camera_thread.start()
+
+keypad = Keypad(db, status, camera)
+keypad_thread = ObjThread(obj=keypad, name="KeypadThread")
+keypad_thread.start()
 
 imu_sensor = IMUSensor(status)
 imu_sensor = ObjThread(obj=imu_sensor, name="IMUThread")
