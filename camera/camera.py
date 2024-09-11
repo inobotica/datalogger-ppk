@@ -12,11 +12,10 @@ class Camera:
         self.state = state
         self.camera_name = None
         self.settings = None
-        self.CAPTURE_PERIOD = 3000
+        self.CAPTURE_PERIOD = 3500
 
-        # self.releaseCamera()
-        # self.camera = gp.Camera()
-        # self.camera.init()
+        self.releaseCamera()
+        self.camera = None
 
     def get_summary(self) -> None:
         text = self.camera.get_summary()
@@ -88,6 +87,7 @@ class Camera:
 
         print("Taking photo...")
 
+        self.state.photo.is_busy = True
         image_path = "/home/pi/datalogger-ppk/camera/image.log"
         f = open(image_path, "w")
         f.close()
@@ -112,6 +112,8 @@ class Camera:
                 name = line
                 break
 
+        self.state.photo.is_busy = False
+
         if name:
             print("PTP line", name)
             count = name[name.index("D.S.C.") + 6 :].replace(".", "")
@@ -122,13 +124,19 @@ class Camera:
         return False
 
     def trigger_capture(self):
-        if not self.state.photo.count:
-            self.capture_image_cmd()
-            time.sleep(10)
+        # if not self.state.photo.count:
+        #     self.capture_image_cmd()
+        #     time.sleep(10)
 
         if self.state.camera:
+            if not self.camera:
+                print("Initializing camera...")
+                self.camera = gp.Camera()
+                self.camera.init()
+
             self.state.photo.increase_count()
-            gp.gp_camera_trigger_capture(self.camera)
+            self.database.insert_position(self.state)
+            gp.check_result(gp.gp_camera_trigger_capture(self.camera))
             print("photo", self.state.photo.name)
 
     def trigger_capture_cmd(self):
@@ -151,10 +159,11 @@ class Camera:
                 print("delta", delta)
                 last_shot = int(1000 * time.time())
                 self.trigger_capture_cmd()
+                # self.trigger_capture()
 
 
 if __name__ == "__main__":
-    camera = Camera("")
+    camera = Camera("", "")
     os.system("pkill -f gphoto2")
     os.system("pkill -f gvfsd-gph")
     # camera.releaseCamera()
