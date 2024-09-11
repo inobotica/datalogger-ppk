@@ -7,10 +7,13 @@ import gphoto2 as gp
 
 
 class Camera:
-    def __init__(self, state) -> None:
+    def __init__(self, database, state) -> None:
+        self.database = database
         self.state = state
         self.camera_name = None
         self.settings = None
+        self.CAPTURE_PERIOD = 3000
+
         # self.releaseCamera()
         # self.camera = gp.Camera()
         # self.camera.init()
@@ -131,6 +134,8 @@ class Camera:
     def trigger_capture_cmd(self):
         if self.state.camera:
             self.state.photo.increase_count()
+            self.database.insert_position(self.state)
+
             cmd = ["gphoto2", "--trigger-capture"]
             subprocess.run(cmd, capture_output=True, text=True)
             print("photo", self.state.photo.name)
@@ -142,7 +147,7 @@ class Camera:
         while True:
             delta = int(1000 * time.time()) - last_shot
 
-            if self.state.camera and self.state.db_log and delta >= 2500:
+            if self.state.camera and self.state.db_log and delta >= self.CAPTURE_PERIOD:
                 print("delta", delta)
                 last_shot = int(1000 * time.time())
                 self.trigger_capture_cmd()

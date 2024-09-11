@@ -72,6 +72,14 @@ class LCD:
                 fill="white",
             )
 
+            # Photo name
+            self.draw.text(
+                (10, 50),
+                self.state.photo.name,
+                font=self.font,
+                fill="white",
+            )
+
             self.draw.text(
                 (self.wifi_x_pos, self.wifi_y_pos),
                 "IP: " + self.state.wifi,

@@ -1,10 +1,11 @@
 import os
+import time
 from datetime import datetime, timezone
 
 from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import sessionmaker
 
-from .models import Datalogs, datalogs_table
+from .models import Datalogs, Gis, datalogs_table, gis_table
 
 
 class Database:
@@ -27,6 +28,17 @@ class Database:
         db_obj = Datalogs(filename=self.filepath)
         self.insert_data(db_obj)
         return db_obj
+
+    def insert_position(self, state):
+        gis_obj = Gis(
+            unix_time=time.time(),
+            photo=state.photo.name,
+            pitch=state.imu.pitch,
+            roll=state.imu.roll,
+            datalog_id=state.db_log.id,
+        )
+
+        self.insert_data(gis_obj)
 
     def get_log(self, orm_model, condition):
         # query for ``User`` objects

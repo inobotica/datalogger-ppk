@@ -36,7 +36,7 @@ gps = GPS(status)
 gps_thread = ObjThread(obj=gps, name="GPSThread")
 gps_thread.start()
 
-camera = Camera(status)
+camera = Camera(db, status)
 camera_thread = ObjThread(obj=camera, name="CameraThread")
 camera_thread.start()
 
