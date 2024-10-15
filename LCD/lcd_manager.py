@@ -91,6 +91,20 @@ class LCD:
                 fill="white",
             )
 
+            # Geotag state
+            geotag_text = (
+                self.state.storage_name
+                if self.state.storage_name and not self.state.geotag
+                else self.state.geotag
+            )
+            geotag_text = "TAG: " + (geotag_text or "")
+            self.draw.text(
+                (10, 70),
+                geotag_text,
+                font=self.font,
+                fill="white",
+            )
+
             # time
             self.draw.text(
                 (10, 100),

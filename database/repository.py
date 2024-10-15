@@ -40,6 +40,23 @@ class Database:
 
         self.insert_data(gis_obj)
 
+    def get_gps_points_cloud(self, filename):
+        self.base_dir = "/home/pi/datalogger-ppk/logs"
+        self.filename = filename + ".ubx"
+        self.filepath = os.path.join(self.base_dir, self.filename)
+        print("Searching for: ", self.filepath)
+        query = select(Datalogs.id).where(Datalogs.filename == self.filepath)
+        result = self.session.scalars(query).all()
+
+        if not result or len(result) < 1:
+            return None
+
+        datalog_id = result[0]
+        query = select(Gis).where(Gis.datalog_id == datalog_id)
+        result = self.session.scalars(query).all()
+
+        return result if result else []
+
     def get_log(self, orm_model, condition):
         # query for ``User`` objects
         statement = select(orm_model).filter_by(name=condition)

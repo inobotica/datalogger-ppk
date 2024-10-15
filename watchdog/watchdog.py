@@ -1,6 +1,7 @@
 import os
 import subprocess
 import time
+from pwd import getpwuid
 
 
 class Photo:
@@ -34,6 +35,36 @@ class Status:
         self.imu = None
         self.photo = Photo()
         self.usb_port = None
+        self.geotag = None
+        self.storage_name = None
+        self.MASS_STORAGE_DIR = "/media/pi/"
+
+    def get_usb_connected(self):
+        is_there_folder = os.path.exists(self.MASS_STORAGE_DIR)
+
+        if not is_there_folder:
+            return None
+
+        dir_list = self.find_owner(os.listdir(self.MASS_STORAGE_DIR))
+
+        if not len(dir_list):
+            return None
+        else:
+            # path = os.path.join(self.MASS_STORAGE_DIR, dir_list[-1])
+            path = dir_list[-1]
+            return path
+
+    def find_owner(self, folders):
+        filtered_folders = []
+
+        for f in folders:
+            folder_path = os.path.join(self.MASS_STORAGE_DIR, f)
+            owner = getpwuid(os.stat(folder_path).st_uid).pw_name
+
+            if owner == "pi":
+                filtered_folders.append(f)
+
+        return filtered_folders
 
     def check_status(self):
         cmd = "lsusb | grep -i -v hub"
@@ -56,6 +87,8 @@ class Status:
         cmd = "hostname -I | cut -d' ' -f1"
         IP = subprocess.check_output(cmd, shell=True).decode("utf-8")
         self.wifi = IP
+
+        self.storage_name = self.get_usb_connected()
 
     def start(self):
         print("Starting Status Thread...")

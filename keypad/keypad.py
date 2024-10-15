@@ -5,6 +5,8 @@ from threading import Thread
 
 import RPi.GPIO as GPIO
 
+from geotagger.geotag_manager import Geotagger
+
 
 class Keypad:
     def __init__(self, database, status, camera) -> None:
@@ -22,6 +24,7 @@ class Keypad:
         self.database = database
         self.status = status
         self.camera = camera
+        self.geotagger = Geotagger(database, status)
 
         # Keys setup
         GPIO.setmode(GPIO.BCM)
@@ -127,6 +130,8 @@ class Keypad:
             print("right")
         elif channel == self.KEY_PRESS_PIN:
             print("press")
+            print("Running Geotagger")
+            self.geotagger.run()
 
     def start(self):
         print("Starting Keypad Thread...")
