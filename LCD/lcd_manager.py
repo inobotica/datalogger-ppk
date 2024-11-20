@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 import subprocess
 import time
+from datetime import datetime
 
 from PIL import Image, ImageColor, ImageDraw, ImageFont
 
@@ -19,6 +20,7 @@ class LCD:
 
         # Create blank image for drawing.
         self.image = Image.new("RGB", (self.disp.width, self.disp.height))
+        self.image.rotate(180)
 
         # Get drawing object to draw on image.
         self.draw = ImageDraw.Draw(self.image)
@@ -39,6 +41,10 @@ class LCD:
         print("Starting LCD Thread...")
 
         while True:
+            self.draw.rectangle(
+                (0, 0, self.disp.width, self.disp.height), outline=0, fill=0
+            )
+
             self.draw.text(
                 (10, 10),
                 "GPS",
@@ -63,11 +69,46 @@ class LCD:
             log_status = "LOG: " + (
                 self.state.db_log.filename[-10:] if self.state.db_log else "EN ESPERA"
             )
-            print("LOG status", log_status)
-
+            color = "red" if self.state.db_log else "white"
             self.draw.text(
                 (10, 30),
                 log_status,
+                font=self.font,
+                fill=color,
+            )
+
+            # Photo name
+            photo_text = (
+                "PROCESANDO FOTO..."
+                if self.state.photo.is_busy
+                else self.state.photo.name
+            )
+
+            self.draw.text(
+                (10, 50),
+                photo_text,
+                font=self.font,
+                fill="white",
+            )
+
+            # Geotag state
+            geotag_text = (
+                self.state.storage_name
+                if self.state.storage_name and not self.state.geotag
+                else self.state.geotag
+            )
+            geotag_text = "TAG: " + (geotag_text or "")
+            self.draw.text(
+                (10, 70),
+                geotag_text,
+                font=self.font,
+                fill="white",
+            )
+
+            # time
+            self.draw.text(
+                (10, 100),
+                datetime.utcnow().strftime("%Y.%m.%d %H:%M:%S"),
                 font=self.font,
                 fill="white",
             )

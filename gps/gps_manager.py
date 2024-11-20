@@ -7,8 +7,9 @@ from serial import Serial
 
 
 class GPS:
-    def __init__(self, status):
-        self.status = status
+    def __init__(self, state):
+        self.BAUDRATE = [57600, 115200][1]
+        self.state = state
         self.serial_port = None
         self.ubr = None
         self.file = None  # open(self.filepath, "ab")
@@ -19,7 +20,7 @@ class GPS:
         # print(self.filepath)
 
     def read_line(self):
-        self.serial_port = Serial("/dev/ttyACM0", 115200, timeout=3)
+        self.serial_port = Serial("/dev/ttyACM0", self.BAUDRATE, timeout=3)
         self.ubr = UBXReader(self.serial_port, protfilter=NMEA_PROTOCOL | UBX_PROTOCOL)
         raw_data, parsed_data = self.ubr.read()
 
@@ -29,20 +30,20 @@ class GPS:
     def save_ubx_message(self):
 
         # Checks serial port availability
-        if not self.status.gps:
+        if not self.state.gps:
             self.serial_port = None
             time.sleep(0.5)
             return None
 
-        if self.status.gps and not self.serial_port:
+        if self.state.gps and not self.serial_port:
             print("Opening serial port...")
 
-            self.serial_port = Serial("/dev/ttyACM0", 115200, timeout=3)
+            self.serial_port = Serial(self.state.usb_port, self.BAUDRATE, timeout=3)
             self.ubr = UBXReader(
                 self.serial_port, protfilter=NMEA_PROTOCOL | UBX_PROTOCOL
             )
 
-        self.filename = self.status.db_log.filename if self.status.db_log else None
+        self.filename = self.state.db_log.filename if self.state.db_log else None
         raw_data, parsed_data = self.ubr.read()
 
         # Creates a new log file

@@ -11,9 +11,11 @@ CREATE TABLE datalogs (
 CREATE TABLE gis (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    unix_time NUMERIC,
+    unix_time REAL,
     datalog_id INTEGER NOT NULL,
     photo VARCHAR, 
+    lat REAL,
+    lon REAL,
     pitch REAL,
     roll  REAL,
     FOREIGN KEY(datalog_id) REFERENCES datalogs(id)

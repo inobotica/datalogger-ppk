@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 import time
@@ -6,12 +7,15 @@ import gphoto2 as gp
 
 
 class Camera:
-    def __init__(self) -> None:
+    def __init__(self, database, state) -> None:
+        self.database = database
+        self.state = state
         self.camera_name = None
         self.settings = None
-        self.photo_count = None
-        self.camera = gp.Camera()
-        self.camera.init()
+        self.CAPTURE_PERIOD = 3500
+
+        self.releaseCamera()
+        self.camera = None
 
     def get_summary(self) -> None:
         text = self.camera.get_summary()
@@ -33,6 +37,17 @@ class Camera:
     def releaseCamera(self):
         print("Releasing camera...")
         errorTrace = "kill gphoto"
+
+        cmd = "pkill -f gphoto2"
+        ps = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        )
+
+        cmd = "gphoto2 --set-config capturetarget=1"
+        ps = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        )
+
         try:
             killGphoto = ["pkill", "-f", "gphoto2"]
             subprocess.run(
@@ -64,30 +79,95 @@ class Camera:
         )
 
         print("Camera file path: {0}/{1}".format(file_path.folder, file_path.name))
-        print("Ellapsed time(ms):", int(1000 * (time.time() - ti)))
+        print("GPHOTO Ellapsed time(ms):", int(1000 * (time.time() - ti)))
+
+    def capture_image_cmd(self):
+        if not self.state.camera:
+            return False
+
+        print("Taking photo...")
+
+        self.state.photo.is_busy = True
+        image_path = "/home/pi/datalogger-ppk/camera/image.log"
+        f = open(image_path, "w")
+        f.close()
+
+        cmd = [
+            "gphoto2",
+            "--debug",
+            "--debug-loglevel=data",
+            f"--debug-logfile={image_path}",
+            "--wait-event=3s",
+            "--capture-image",
+        ]
+        subprocess.run(cmd, capture_output=True, text=True)
+
+        lines = open(image_path).readlines()
+        name = None
+
+        for index in range(10000, len(lines)):
+            line = lines[index].strip()
+
+            if "D.S.C." in line:
+                name = line
+                break
+
+        self.state.photo.is_busy = False
+
+        if name:
+            print("PTP line", name)
+            count = name[name.index("D.S.C.") + 6 :].replace(".", "")
+            self.state.photo.count = count
+            print("Photo taken:", self.state.photo.name)
+            return True
+
+        return False
 
     def trigger_capture(self):
-        ti = time.time()
-        gp.gp_camera_trigger_capture(self.camera)
-        print("Ellapsed time(ms):", int(1000 * (time.time() - ti)))
+        # if not self.state.photo.count:
+        #     self.capture_image_cmd()
+        #     time.sleep(10)
+
+        if self.state.camera:
+            if not self.camera:
+                print("Initializing camera...")
+                self.camera = gp.Camera()
+                self.camera.init()
+
+            self.state.photo.increase_count()
+            self.database.insert_position(self.state)
+            gp.check_result(gp.gp_camera_trigger_capture(self.camera))
+            print("photo", self.state.photo.name)
 
     def trigger_capture_cmd(self):
-        ti = time.time()
+        if self.state.camera:
+            self.state.photo.increase_count()
+            self.database.insert_position(self.state)
 
-        try:
-            fastCapture = ["gphoto2", "--trigger-capture"]
-            subprocess.run(
-                fastCapture, check=True, stdout=subprocess.PIPE, universal_newlines=True
-            )
-        except subprocess.CalledProcessError:
-            print("Error")
+            cmd = ["gphoto2", "--trigger-capture"]
+            subprocess.run(cmd, capture_output=True, text=True)
+            print("photo", self.state.photo.name)
 
-        print("Ellapsed time(ms):", int(1000 * (time.time() - ti)))
+    def start(self):
+        last_shot = int(1000 * time.time())
+        print("Starting Camera Thread...")
+
+        while True:
+            delta = int(1000 * time.time()) - last_shot
+
+            if self.state.camera and self.state.db_log and delta >= self.CAPTURE_PERIOD:
+                print("delta", delta)
+                last_shot = int(1000 * time.time())
+                self.trigger_capture_cmd()
+                # self.trigger_capture()
 
 
 if __name__ == "__main__":
-    camera = Camera()
-    camera.releaseCamera()
-    camera.detect_camera()
-    # camera.trigger_capture()
-    camera.trigger_capture_cmd()
+    camera = Camera("", "")
+    os.system("pkill -f gphoto2")
+    os.system("pkill -f gvfsd-gph")
+    # camera.releaseCamera()
+    # camera.detect_camera()
+    camera.trigger_capture()
+    # camera.trigger_capture_cmd()
+    # camera.capture_image()

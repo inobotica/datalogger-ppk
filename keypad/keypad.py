@@ -5,9 +5,11 @@ from threading import Thread
 
 import RPi.GPIO as GPIO
 
+from geotagger.geotag_manager import Geotagger
+
 
 class Keypad:
-    def __init__(self, database, status) -> None:
+    def __init__(self, database, status, camera) -> None:
         self.KEY_UP_PIN = 6
         self.KEY_DOWN_PIN = 19
         self.KEY_LEFT_PIN = 5
@@ -21,6 +23,8 @@ class Keypad:
 
         self.database = database
         self.status = status
+        self.camera = camera
+        self.geotagger = Geotagger(database, status)
 
         # Keys setup
         GPIO.setmode(GPIO.BCM)
@@ -110,6 +114,7 @@ class Keypad:
             print("key2")
         elif channel == self.KEY3_PIN:
             print("key3")
+            self.camera.capture_image_cmd()
 
     def joystick_callback(self, channel):
         """
@@ -125,6 +130,8 @@ class Keypad:
             print("right")
         elif channel == self.KEY_PRESS_PIN:
             print("press")
+            print("Running Geotagger")
+            self.geotagger.run()
 
     def start(self):
         print("Starting Keypad Thread...")
