@@ -30,6 +30,5 @@ cd imusensor
 pip install . --break-system-packages
 ```
 
-
 # Check i2c port
 sudo i2cdetect -y 1
