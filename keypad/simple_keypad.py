@@ -21,7 +21,7 @@ class Keypad:
         self.START_PIN = 24
         self.TRIGGER_PIN = 26
         self.BOUNCE_TIME = 500
-        
+
         self.database = database
         self.status = status
         self.camera = camera
@@ -82,8 +82,11 @@ class Keypad:
                 rows = self.database.get_gps_points_cloud(
                     self.status.db_log.filename, is_full_path=True
                 )
-                file_path = self.status.path + "/" + self.status.db_log.filename.split("/")[-1].replace(
-                    ".ubx", ".txt")
+                file_path = (
+                    self.status.path
+                    + "/"
+                    + self.status.db_log.filename.split("/")[-1].replace(".ubx", ".txt")
+                )
                 print("Dumping DB points to:", file_path)
                 with open(file_path, "w", encoding="utf-8") as f:
                     data = [
@@ -92,11 +95,11 @@ class Keypad:
                     ]
                     data.insert(0, "time, unix_time, photo, pitch, roll")
                     f.write("\n".join(data))
-                
+
             # Resets log
             self.status.db_log = None
 
-    def start_stop_intervalometer_callback(self, channel):        
+    def start_stop_intervalometer_callback(self, channel):
         self.camera.start_stop_intervalometer()
 
     def start(self):

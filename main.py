@@ -3,6 +3,7 @@ import os
 import threading
 import time
 
+from camera.mapir_camera import BLEConfig, ThreadedBleClient
 from camera.simple_camera import Camera
 from database.repository import Database
 from gps.gps_manager import GPS
@@ -10,7 +11,6 @@ from imu.imu_manager import IMUSensor
 from keypad.simple_keypad import Keypad
 from LCD.simple_lcd_manager import LCD
 from watchdog.watchdog import Status
-from camera.mapir_camera import BLEConfig, ThreadedBleClient
 
 db = Database()
 
@@ -60,7 +60,6 @@ keypad_thread.start()
 imu_sensor = IMUSensor(status)
 imu_sensor = ObjThread(obj=imu_sensor, name="IMUThread")
 imu_sensor.start()
-
 
 
 while True:

@@ -2,13 +2,14 @@ import os
 import subprocess
 import time
 from pwd import getpwuid
-from typing import Dict, Any
+from typing import Any, Dict
 
 import serial
 from serial.tools import list_ports
 
 ESPRESSIF_VID = 0x303A
 BAUDRATE = 115200
+
 
 def _is_esp32_by_metadata(p) -> bool:
     """
@@ -18,12 +19,11 @@ def _is_esp32_by_metadata(p) -> bool:
         return True
 
     text = " ".join(
-        str(x).lower()
-        for x in [p.manufacturer, p.product, p.description, p.hwid]
-        if x
+        str(x).lower() for x in [p.manufacturer, p.product, p.description, p.hwid] if x
     )
 
     return "espressif" in text
+
 
 def identify_ports() -> Dict[str, str]:
     """
@@ -31,10 +31,7 @@ def identify_ports() -> Dict[str, str]:
       - 'mapir' → ESP32 port (if present)
       - 'gps'   → other serial device (if present)
     """
-    ports = [
-        p for p in list_ports.comports()
-        if p.device.startswith("/dev/tty")
-    ]
+    ports = [p for p in list_ports.comports() if p.device.startswith("/dev/tty")]
 
     esp32_port = None
     other_ports = []
@@ -56,6 +53,7 @@ def identify_ports() -> Dict[str, str]:
 
     return result
 
+
 class Photo:
     def __init__(self) -> None:
         self.name = ""
@@ -73,7 +71,7 @@ class Photo:
 
     def increase_count(self):
         self.count += 1
-        self.count = int(self.count%10000)
+        self.count = int(self.count % 10000)
         self.name = f"DSC{self._count:05}.JPG"
         return self.name
 

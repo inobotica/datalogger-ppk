@@ -1,6 +1,6 @@
 import os
 import time
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
 from pyubx2 import NMEA_PROTOCOL, UBX_PROTOCOL, UBXReader
 from serial import Serial
@@ -18,7 +18,7 @@ class GPS:
         # self.filepath = os.path.join(self.base_dir, self.filename)
         self.base_altitude = None
         self.altitude = None
-        self.tow_time = None # time of gps which is +18s ahead of UTC
+        self.tow_time = None  # time of gps which is +18s ahead of UTC
         # print(self.filepath)
 
     def read_line(self):
@@ -31,7 +31,7 @@ class GPS:
 
     def set_tow_time(self, parsed_data):
         """
-        Sets tow time which is +18 seconds ahead of UTC time   
+        Sets tow time which is +18 seconds ahead of UTC time
         """
         valid_date = getattr(parsed_data, "validDate", 0) == 1
         valid_time = getattr(parsed_data, "validTime", 0) == 1
@@ -42,10 +42,12 @@ class GPS:
             epoch = datetime(1980, 1, 6, tzinfo=timezone.utc)
             difference = now - epoch
             epoch_weeks = int(difference.total_seconds() / 604800)
-            gps_time = epoch + timedelta(weeks=epoch_weeks, milliseconds=parsed_data.iTOW)
+            gps_time = epoch + timedelta(
+                weeks=epoch_weeks, milliseconds=parsed_data.iTOW
+            )
 
-            #print("sys time:", datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
-            #print("tow time:",gps_time.strftime("%Y-%m-%d %H:%M:%S"))
+            # print("sys time:", datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
+            # print("tow time:",gps_time.strftime("%Y-%m-%d %H:%M:%S"))
 
             self.tow_time = gps_time
             self.state.tow_time = gps_time

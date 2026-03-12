@@ -2,14 +2,14 @@ import asyncio
 import threading
 import time
 from dataclasses import dataclass
-from typing import Optional, Callable
+from typing import Callable, Optional
 
-from bleak import BleakScanner, BleakClient
+from bleak import BleakClient, BleakScanner
 
 SERVICE_UUID = "12345678-1234-1234-1234-1234567890ab"
-RX_UUID      = "12345678-1234-1234-1234-1234567890ac"  # write to ESP32
-TX_UUID      = "12345678-1234-1234-1234-1234567890ad"  # notifications from ESP32
-TARGET_NAME  = "MAPIR-BLE"
+RX_UUID = "12345678-1234-1234-1234-1234567890ac"  # write to ESP32
+TX_UUID = "12345678-1234-1234-1234-1234567890ad"  # notifications from ESP32
+TARGET_NAME = "MAPIR-BLE"
 
 
 def default_notify_handler(data: bytes) -> None:
@@ -30,7 +30,11 @@ class ThreadedBleClient:
     Public methods are synchronous/thread-friendly: start(), send(), stop().
     """
 
-    def __init__(self, cfg: BLEConfig, on_notify: Callable[[bytes], None] = default_notify_handler):
+    def __init__(
+        self,
+        cfg: BLEConfig,
+        on_notify: Callable[[bytes], None] = default_notify_handler,
+    ):
         self.cfg = cfg
         self.on_notify = on_notify
 
@@ -53,7 +57,9 @@ class ThreadedBleClient:
         self._ready_evt.clear()
         self._connected_evt.clear()
 
-        self._thread = threading.Thread(target=self._run_loop_thread, name="ble-thread", daemon=True)
+        self._thread = threading.Thread(
+            target=self._run_loop_thread, name="ble-thread", daemon=True
+        )
         self._thread.start()
 
         # Wait until loop exists
@@ -97,7 +103,6 @@ class ThreadedBleClient:
             self._loop,
         )
         fut.result(timeout=timeout)
-
 
     def _run_loop_thread(self) -> None:
         self._loop = asyncio.new_event_loop()

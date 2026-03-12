@@ -5,6 +5,7 @@ import time
 
 import gphoto2 as gp
 import RPi.GPIO as GPIO
+
 from camera.mapir_camera_serial import MapirCamera
 
 """
@@ -26,7 +27,7 @@ class Camera:
         self.database = database
         self.state = state
         self.camera = None
-        self.LED_PIN = 13 # Pin to signal that a trigger was detected
+        self.LED_PIN = 13  # Pin to signal that a trigger was detected
         self.SHUTTER_PIN = 17  # Pin to detect shutting of camera throgh hotshoe
         self.TRIGGER_PIN = 27  # Pin to send IO to IR remote
         self.CAPTURE_PIN = 25  # Pin to capture an image and sync seq ID
@@ -36,7 +37,7 @@ class Camera:
         self.PHOTO_THRESHOLD = 5
         self.PHOTO_COUNT = 0
         self.mapir_camera = MapirCamera(state)
-        #self.ble = ble
+        # self.ble = ble
 
         GPIO.setmode(GPIO.BCM)
 
@@ -83,9 +84,9 @@ class Camera:
 
         self.mapir_camera.trigger_camera("on" if self.intervalometer_state else "off")
 
-        #self.ble.capture()
-        #self.trigger_capture_cmd()
-        #self.trigger_capture()
+        # self.ble.capture()
+        # self.trigger_capture_cmd()
+        # self.trigger_capture()
 
     def shutter_detection(self, channel) -> None:
         print("Shutter detected!")

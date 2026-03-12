@@ -87,8 +87,6 @@ def parse_file(filepath):
     return waypoints
 
 
-
-
 def save_csv_file(filepath, csv_points):
     fields = [
         "time",
@@ -126,12 +124,14 @@ class Geotagger:
 
         print("Matching gps <--> log points...")
         for counter, log_point in enumerate(log_points):
-            progress = int(100*(counter/len(log_points)))
+            progress = int(100 * (counter / len(log_points)))
             self.state.geotag = f"TAG: {progress}%"
             deltas = []
 
             for gps_point in gps_points:
-                delta = abs(log_point.unix_time - gps_point.unix_time) if gps_point else 99
+                delta = (
+                    abs(log_point.unix_time - gps_point.unix_time) if gps_point else 99
+                )
                 deltas.append(delta)
 
             min_delta = min(deltas)
@@ -182,7 +182,9 @@ class Geotagger:
             else:
                 print(len(log_points), "points found!")
 
-            csv_points = self.match_points(gps_points=file_waypoints, log_points=log_points)
+            csv_points = self.match_points(
+                gps_points=file_waypoints, log_points=log_points
+            )
             self.state.geotag = "TAG: Guardando .CSV"
             save_csv_file(filepath=file_path, csv_points=csv_points)
 

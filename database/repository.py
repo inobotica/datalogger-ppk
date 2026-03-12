@@ -33,11 +33,13 @@ class Database:
         return db_obj
 
     def insert_position(self, state):
-        _timestamp = state.tow_time if self.use_tow_time and state.tow_time else time.time()
+        _timestamp = (
+            state.tow_time if self.use_tow_time and state.tow_time else time.time()
+        )
         _unix_time = _timestamp.timestamp()
 
-        #print("sys time:", datetime.utcnow())
-        #print("tow time:", _timestamp)
+        # print("sys time:", datetime.utcnow())
+        # print("tow time:", _timestamp)
 
         gis_obj = Gis(
             unix_time=_unix_time,
@@ -57,7 +59,7 @@ class Database:
             self.base_dir = "/home/pi/datalogger-ppk/logs"
             self.filename = filename + ".ubx"
             self.filepath = os.path.join(self.base_dir, self.filename)
-            
+
         print("Searching in db for: ", self.filepath)
         query = select(Datalogs.id).where(Datalogs.filename == self.filepath)
         result = self.session.scalars(query).all()

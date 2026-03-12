@@ -1,24 +1,28 @@
-import os
-import sys 
-import time
 import logging
-import spidev as SPI
+import os
 import subprocess
+import sys
+import time
+
+import spidev as SPI
+
 sys.path.append("..")
+from datetime import datetime
+from pathlib import Path
+
 from lib import LCD_1inch69
 from PIL import Image, ImageDraw, ImageFont
-from pathlib import Path
-from datetime import datetime
 
 # Raspberry Pi pin configuration:
 RST = 27
 DC = 25
 BL = 18
-bus = 0 
-device = 0 
-logging.basicConfig(level = logging.DEBUG)
+bus = 0
+device = 0
+logging.basicConfig(level=logging.DEBUG)
 
 IMAGE_FOLDER = "/home/pi/Documents/oled/image/"
+
 
 class Icon:
     def __init__(self, _x, _y, _name):
@@ -26,23 +30,25 @@ class Icon:
         self.name = _name
         self.folder = Path(IMAGE_FOLDER)
 
-    def set_on(self, _image)->Image:
+    def set_on(self, _image) -> Image:
         _icon = Image.open(self.folder / (self.name + "_on.png"))
         _image.paste(_icon, self.position)
         return _image
 
-    def set_off(self, _image)->Image:
+    def set_off(self, _image) -> Image:
         _icon = Image.open(self.folder / (self.name + "_off.png"))
         _image.paste(_icon, self.position)
         return _image
 
+
 class OledView:
     """Main class for oled view"""
+
     def __init__(self, state):
         self.width = 240
         self.height = 280
         self.header = 10
-        
+
         self.log_pos = (20, 60)
         self.cam_pos = (20, 90)
         self.geotag_pos = (20, 120)
@@ -60,19 +66,22 @@ class OledView:
             self.display = LCD_1inch69.LCD_1inch69()
             self.display.Init()
             self.display.clear()
-            #Set the backlight to 100
+            # Set the backlight to 100
             self.display.bl_DutyCycle(80)
 
             self.display_size = (self.display.width, self.display.height)
-            self.font = ImageFont.truetype("/home/pi/Documents/oled/Font/Font02.ttf", 22)
-            self.font_small = ImageFont.truetype("/home/pi/Documents/oled/Font/Font02.ttf", 18)
+            self.font = ImageFont.truetype(
+                "/home/pi/Documents/oled/Font/Font02.ttf", 22
+            )
+            self.font_small = ImageFont.truetype(
+                "/home/pi/Documents/oled/Font/Font02.ttf", 18
+            )
             self.image = Image.new("RGB", self.display_size, "BLACK")
             self.draw = ImageDraw.Draw(self.image)
 
-
         except IOError as e:
-            logging.info(e)    
-            
+            logging.info(e)
+
         except KeyboardInterrupt:
             self.display.module_exit()
             logging.info("quit:")
@@ -80,7 +89,7 @@ class OledView:
 
     def clear_view(self):
         self.display.clear()
-    
+
     def update_view(self):
         self.display.clear()
         self.image = Image.new("RGB", self.display_size, "BLACK")
@@ -92,10 +101,10 @@ class OledView:
 
     def update_messages(self):
         # Log status
-        self.draw.text(self.log_pos, 'LOG: Grabando', fill = "WHITE", font=self.font)
+        self.draw.text(self.log_pos, "LOG: Grabando", fill="WHITE", font=self.font)
 
         # Camera status
-        self.draw.text(self.cam_pos, 'CAM: DSC0001.JPG', fill = "WHITE", font=self.font)
+        self.draw.text(self.cam_pos, "CAM: DSC0001.JPG", fill="WHITE", font=self.font)
 
         # Time
         self.draw.text(
@@ -106,7 +115,7 @@ class OledView:
         )
 
         # IP
-        self.draw.text(self.ip_pos, self.get_ip(), fill = "GREEN", font=self.font_small)
+        self.draw.text(self.ip_pos, self.get_ip(), fill="GREEN", font=self.font_small)
 
     def update_icons(self):
         self.image = self.camera_icon.set_off(self.image)
@@ -115,14 +124,15 @@ class OledView:
         self.image = self.wifi_icon.set_off(self.image)
 
     def splashscreen(self):
-        image = Image.open("/home/pi/Documents/oled_splashscreen.png")    
+        image = Image.open("/home/pi/Documents/oled_splashscreen.png")
         self.display.ShowImage(image)
 
     def get_ip(self):
         cmd = "hostname -I | cut -d' ' -f1"
         IP = subprocess.check_output(cmd, shell=True).decode("utf-8")
         return IP
-    
+
+
 if __name__ == "__main__":
     oled_display = OledView({})
     oled_display.splashscreen()

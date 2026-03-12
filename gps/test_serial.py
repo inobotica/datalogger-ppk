@@ -1,9 +1,11 @@
-from serial import Serial
-from pyubx2 import UBXReader
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
-stream = Serial('/dev/ttyACM0', 115200, timeout=3)
+from pyubx2 import UBXReader
+from serial import Serial
+
+stream = Serial("/dev/ttyACM0", 115200, timeout=3)
 ubr = UBXReader(stream)
+
 
 def get_gps_time(itow_ms):
     now = datetime.now(timezone.utc)
@@ -11,12 +13,13 @@ def get_gps_time(itow_ms):
     difference = now - epoch
     epoch_weeks = int(difference.total_seconds() / 604800)
     gps_time = epoch + timedelta(weeks=epoch_weeks, milliseconds=itow_ms)
-    
+
     return gps_time
+
 
 index = 0
 
-while index<20:
+while index < 20:
     raw_data, parsed_data = ubr.read()
     if parsed_data.identity == "NAV-PVT":
         print(parsed_data)
