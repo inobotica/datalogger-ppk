@@ -9,7 +9,7 @@ from database.repository import Database
 from gps.gps_manager import GPS
 from imu.imu_manager import IMUSensor
 from keypad.simple_keypad import Keypad
-from LCD.simple_lcd_manager import LCD
+from LCD.lcd import OledView
 from watchdog.watchdog import Status
 
 db = Database()
@@ -33,7 +33,7 @@ gps = GPS(status)
 gps_thread = ObjThread(obj=gps, name="GPSThread")
 gps_thread.start()
 
-lcd = LCD(status, gps)
+lcd = OledView(status)
 lcd_thread = ObjThread(obj=lcd, name="LCDThread")
 lcd_thread.start()
 

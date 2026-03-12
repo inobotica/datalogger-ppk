@@ -20,6 +20,8 @@ sudo apt install gphoto2 -y
 pip install sqlalchemy --break-system-packages
 pip install pyubx2 --break-system-packages
 pip install easydict --break-system-packages
+pip install bleak --break-system-packages
+pip install gphoto2 --break-system-packages
 
 # Create database
 sqlite3 /home/pi/datalogger-ppk/database/datalogger.db

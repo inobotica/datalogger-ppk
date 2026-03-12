@@ -27,10 +27,10 @@ class Camera:
         self.database = database
         self.state = state
         self.camera = None
-        self.LED_PIN = 13  # Pin to signal that a trigger was detected
+        self.LED_PIN = 6  # Pin to signal that a trigger was detected
         self.SHUTTER_PIN = 17  # Pin to detect shutting of camera throgh hotshoe
-        self.TRIGGER_PIN = 27  # Pin to send IO to IR remote
-        self.CAPTURE_PIN = 25  # Pin to capture an image and sync seq ID
+        self.TRIGGER_PIN = 4   # Pin to send IO to IR remote
+        self.CAPTURE_PIN = 13  # Pin to capture an image and sync seq ID
         self.TRIGGER_BOUNCE_TIME = 20
         self.CAPTURE_BOUNCE_TIME = 300
         self.intervalometer_state = False

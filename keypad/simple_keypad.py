@@ -17,9 +17,9 @@ class Keypad:
         26 - USB button | Shutter
         19 - USB button | Stop log
         """
-        self.GEOTAG_PIN = 23
-        self.START_PIN = 24
-        self.TRIGGER_PIN = 26
+        self.GEOTAG_PIN = 26
+        self.START_PIN = 19
+        self.TRIGGER_PIN = 5
         self.BOUNCE_TIME = 500
 
         self.database = database

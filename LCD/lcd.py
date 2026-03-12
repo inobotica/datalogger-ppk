@@ -10,7 +10,7 @@ sys.path.append("..")
 from datetime import datetime
 from pathlib import Path
 
-from lib import LCD_1inch69
+from .lib import LCD_1inch69
 from PIL import Image, ImageDraw, ImageFont
 
 # Raspberry Pi pin configuration:
@@ -91,7 +91,7 @@ class OledView:
         self.display.clear()
 
     def update_view(self):
-        self.display.clear()
+        #self.display.clear()
         self.image = Image.new("RGB", self.display_size, "BLACK")
         self.draw = ImageDraw.Draw(self.image)
 
@@ -132,6 +132,14 @@ class OledView:
         IP = subprocess.check_output(cmd, shell=True).decode("utf-8")
         return IP
 
+    def start(self):
+        print("Starting LCD Thread...")
+        self.splashscreen()
+        time.sleep(3)
+
+        while True:
+            self.update_view()
+            time.sleep(0.1)
 
 if __name__ == "__main__":
     oled_display = OledView({})
