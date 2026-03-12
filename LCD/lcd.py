@@ -12,6 +12,12 @@ from pathlib import Path
 
 from .lib import LCD_1inch69
 from PIL import Image, ImageDraw, ImageFont
+import logging
+
+import logging
+
+logging.getLogger("PIL").setLevel(logging.WARNING)
+logging.getLogger("PIL").disabled = True
 
 # Raspberry Pi pin configuration:
 RST = 27
@@ -39,6 +45,9 @@ class Icon:
         _icon = Image.open(self.folder / (self.name + "_off.png"))
         _image.paste(_icon, self.position)
         return _image
+
+    def set(self, _image, state) -> Image:
+        return self.set_on(_image) if state else self.set_off(_image)
 
 
 class OledView:
@@ -91,7 +100,6 @@ class OledView:
         self.display.clear()
 
     def update_view(self):
-        #self.display.clear()
         self.image = Image.new("RGB", self.display_size, "BLACK")
         self.draw = ImageDraw.Draw(self.image)
 
@@ -118,10 +126,10 @@ class OledView:
         self.draw.text(self.ip_pos, self.get_ip(), fill="GREEN", font=self.font_small)
 
     def update_icons(self):
-        self.image = self.camera_icon.set_off(self.image)
-        self.image = self.gps_icon.set_off(self.image)
-        self.image = self.usb_icon.set_off(self.image)
-        self.image = self.wifi_icon.set_off(self.image)
+        self.image = self.camera_icon.set(self.image, self.state.camera)
+        self.image = self.gps_icon.set(self.image, self.state.gps)
+        self.image = self.usb_icon.set(self.image, self.state.media)
+        self.image = self.wifi_icon.set(self.image, self.state.wifi)
 
     def splashscreen(self):
         image = Image.open("/home/pi/Documents/oled_splashscreen.png")
