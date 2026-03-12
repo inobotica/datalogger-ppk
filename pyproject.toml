@@ -1,0 +1,2 @@
+[tool.pylint."MESSAGES CONTROL"]
+disable = ["import-error", "invalid-name"]

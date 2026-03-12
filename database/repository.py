@@ -16,6 +16,7 @@ class Database:
         self.session_maker = sessionmaker()
         self.session_maker.configure(bind=self.engine)
         self.session = self.session_maker()
+        self.use_tow_time = True
 
     def insert_data(self, db_obj):
         self.session.add(db_obj)
@@ -23,15 +24,24 @@ class Database:
 
     def insert_log(self):
         self.base_dir = "/home/pi/datalogger-ppk/logs"
-        self.filename = datetime.now(timezone.utc).strftime("%y%m%d_%H%M%S") + ".ubx"
+        self.filename = (
+            datetime.now(timezone.utc).strftime("%y%m%d_%H%M%S") + "_rover.ubx"
+        )
         self.filepath = os.path.join(self.base_dir, self.filename)
         db_obj = Datalogs(filename=self.filepath)
         self.insert_data(db_obj)
         return db_obj
 
     def insert_position(self, state):
+        _timestamp = state.tow_time if self.use_tow_time and state.tow_time else time.time()
+        _unix_time = _timestamp.timestamp()
+
+        #print("sys time:", datetime.utcnow())
+        #print("tow time:", _timestamp)
+
         gis_obj = Gis(
-            unix_time=time.time(),
+            unix_time=_unix_time,
+            time=_timestamp,
             photo=state.photo.name,
             pitch=state.imu.pitch,
             roll=state.imu.roll,
@@ -40,11 +50,15 @@ class Database:
 
         self.insert_data(gis_obj)
 
-    def get_gps_points_cloud(self, filename):
-        self.base_dir = "/home/pi/datalogger-ppk/logs"
-        self.filename = filename + ".ubx"
-        self.filepath = os.path.join(self.base_dir, self.filename)
-        print("Searching for: ", self.filepath)
+    def get_gps_points_cloud(self, filename, is_full_path=False):
+        if is_full_path:
+            self.filepath = filename
+        else:
+            self.base_dir = "/home/pi/datalogger-ppk/logs"
+            self.filename = filename + ".ubx"
+            self.filepath = os.path.join(self.base_dir, self.filename)
+            
+        print("Searching in db for: ", self.filepath)
         query = select(Datalogs.id).where(Datalogs.filename == self.filepath)
         result = self.session.scalars(query).all()
 

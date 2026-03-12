@@ -87,30 +87,6 @@ def parse_file(filepath):
     return waypoints
 
 
-def match_points(gps_points, log_points):
-    csv_points = []
-
-    for log_point in log_points:
-        deltas = []
-
-        for gps_point in gps_points:
-            delta = abs(log_point.unix_time - gps_point.unix_time) if gps_point else 99
-            deltas.append(delta)
-
-        min_delta = min(deltas)
-        min_delta_index = deltas.index(min_delta)
-
-        if min_delta < 1:
-            log_point.lat = gps_points[min_delta_index].lat
-            log_point.lon = gps_points[min_delta_index].lon
-            log_point.time = gps_points[min_delta_index].time
-            log_point.alt = gps_points[min_delta_index].alt
-            csv_points.append(log_point)
-
-            # Remove gps point to avoid relating it to another photo
-            gps_points[min_delta_index] = None
-
-    return csv_points
 
 
 def save_csv_file(filepath, csv_points):
@@ -145,6 +121,34 @@ class Geotagger:
         self.database = database
         self.state = state
 
+    def match_points(self, gps_points, log_points):
+        csv_points = []
+
+        print("Matching gps <--> log points...")
+        for counter, log_point in enumerate(log_points):
+            progress = int(100*(counter/len(log_points)))
+            self.state.geotag = f"TAG: {progress}%"
+            deltas = []
+
+            for gps_point in gps_points:
+                delta = abs(log_point.unix_time - gps_point.unix_time) if gps_point else 99
+                deltas.append(delta)
+
+            min_delta = min(deltas)
+            min_delta_index = deltas.index(min_delta)
+
+            if min_delta < 1:
+                log_point.lat = gps_points[min_delta_index].lat
+                log_point.lon = gps_points[min_delta_index].lon
+                log_point.time = gps_points[min_delta_index].time
+                log_point.alt = gps_points[min_delta_index].alt
+                csv_points.append(log_point)
+
+                # Remove gps point to avoid relating it to another photo
+                gps_points[min_delta_index] = None
+        print(f"Points matched! {len(csv_points)}")
+        return csv_points
+
     def run(self):
         # Get UB path
         filepath = is_there_usb_connected()
@@ -156,7 +160,7 @@ class Geotagger:
         print("USB path:", filepath)
 
         # Get POS files on USB path
-        self.state.geotag = "Leyendo .POS"
+        self.state.geotag = "TAG: Leyendo .POS"
         files = get_pos_files(filepath)
 
         for file in files:
@@ -167,16 +171,19 @@ class Geotagger:
             print("Reading POS file...", file_path)
 
             # Get database information
-            self.state.geotag = "Leyendo DB..."
-            db_filename = "_".join(file.split("_")[:2])
+            self.state.geotag = "TAG: Leyendo DB..."
+            db_filename = "_".join(file.split("_")[:2]) + "_rover"
             log_points = self.database.get_gps_points_cloud(db_filename)
             print("Reading DB data...", db_filename)
 
             if len(log_points) < 1:
+                print("No points found in DB!")
                 continue
+            else:
+                print(len(log_points), "points found!")
 
-            csv_points = match_points(gps_points=file_waypoints, log_points=log_points)
-            self.state.geotag = "Guardando .CSV"
+            csv_points = self.match_points(gps_points=file_waypoints, log_points=log_points)
+            self.state.geotag = "TAG: Guardando .CSV"
             save_csv_file(filepath=file_path, csv_points=csv_points)
 
         self.state.geotag = None

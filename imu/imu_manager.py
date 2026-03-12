@@ -11,7 +11,7 @@ from imusensor.MPU9250 import MPU9250
 class IMUSensor:
     def __init__(self, status):
         self.status = status
-        self.address = 0x68
+        self.address = 0x69
         self.bus = smbus.SMBus(1)
         self.imu = MPU9250.MPU9250(self.bus, self.address)
         self.imu.begin()
