@@ -5,7 +5,7 @@ import time
 
 import gphoto2 as gp
 import RPi.GPIO as GPIO
-
+from camera.ir_trigger import SonyIR
 from camera.mapir_camera_serial import MapirCamera
 
 """
@@ -28,8 +28,8 @@ class Camera:
         self.state = state
         self.camera = None
         self.LED_PIN = 6  # Pin to signal that a trigger was detected
-        self.SHUTTER_PIN = 17  # Pin to detect shutting of camera throgh hotshoe
-        self.TRIGGER_PIN = 4   # Pin to send IO to IR remote
+        self.HOTSHOE_PIN = 17  # Pin to detect shutting of camera throgh hotshoe
+        self.IR_LED_PIN = 4   # Pin to send IO to IR remote
         self.CAPTURE_PIN = 13  # Pin to capture an image and sync seq ID
         self.TRIGGER_BOUNCE_TIME = 20
         self.CAPTURE_BOUNCE_TIME = 300
@@ -37,14 +37,15 @@ class Camera:
         self.PHOTO_THRESHOLD = 5
         self.PHOTO_COUNT = 0
         self.mapir_camera = MapirCamera(state)
+        self.ir_trigger = SonyIR(gpio_pin = self.IR_LED_PIN)        
         # self.ble = ble
 
         GPIO.setmode(GPIO.BCM)
 
         # Shutter input setup
-        GPIO.setup(self.SHUTTER_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(self.HOTSHOE_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.add_event_detect(
-            self.SHUTTER_PIN,
+            self.HOTSHOE_PIN,
             GPIO.FALLING,
             callback=self.shutter_detection,
             bouncetime=self.TRIGGER_BOUNCE_TIME,
@@ -58,9 +59,6 @@ class Camera:
             callback=self.capture_callback,
             bouncetime=self.CAPTURE_BOUNCE_TIME,
         )
-
-        # Trigger pin setup
-        GPIO.setup(self.TRIGGER_PIN, GPIO.OUT)
 
         # Led pin setup
         GPIO.setup(self.LED_PIN, GPIO.OUT)
@@ -78,9 +76,8 @@ class Camera:
         msg = msg + " intervalometer..."
         print(msg)
 
-        GPIO.output(self.TRIGGER_PIN, True)
-        time.sleep(0.05)
-        GPIO.output(self.TRIGGER_PIN, False)
+        # Triggers IR led
+        self.ir_trigger.shutter_now()
 
         self.mapir_camera.trigger_camera("on" if self.intervalometer_state else "off")
 
