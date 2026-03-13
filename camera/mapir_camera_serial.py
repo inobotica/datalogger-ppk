@@ -13,6 +13,7 @@ class MapirCamera:
         """
         if not self.state.mapir_port:
             print("No Mapir camera connected")
+            return None
 
         try:
             with serial.Serial(self.state.mapir_port, BAUDRATE, timeout=2) as ser:

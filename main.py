@@ -3,12 +3,12 @@ import os
 import threading
 import time
 
-from camera.mapir_camera import BLEConfig, ThreadedBleClient
-from camera.simple_camera import Camera
+from camera.mapir_camera_ble import BLEConfig, ThreadedBleClient
+from camera.camera_manager import Camera
 from database.repository import Database
 from gps.gps_manager import GPS
 from imu.imu_manager import IMUSensor
-from keypad.simple_keypad import Keypad
+from keypad.keypad_manager import Keypad
 from LCD.lcd import OledView
 from watchdog.watchdog import Status
 
