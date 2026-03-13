@@ -10,11 +10,9 @@ sys.path.append("..")
 from datetime import datetime
 from pathlib import Path
 
-from .lib import LCD_1inch69
 from PIL import Image, ImageDraw, ImageFont
-import logging
 
-import logging
+from .controller import LCD_1inch69
 
 logging.getLogger("PIL").setLevel(logging.WARNING)
 logging.getLogger("PIL").disabled = True
@@ -58,9 +56,10 @@ class OledView:
         self.height = 280
         self.header = 10
 
-        self.log_pos = (20, 60)
-        self.cam_pos = (20, 90)
-        self.geotag_pos = (20, 120)
+        self.usb_pos = (20, 60)
+        self.log_pos = (20, 90)
+        self.cam_pos = (20, 120)
+        self.geotag_pos = (20, 150)
         self.time_pos = (20, 220)
         self.ip_pos = (70, 250)
 
@@ -108,11 +107,27 @@ class OledView:
         self.display.ShowImage(self.image)
 
     def update_messages(self):
+        # USB status
+        usb_label = (
+            "USB: " + self.state.storage_name if self.state.storage_name else "USB: ---"
+        )
+        self.draw.text(self.usb_pos, usb_label, fill="WHITE", font=self.font)
+
         # Log status
-        self.draw.text(self.log_pos, "LOG: Grabando", fill="WHITE", font=self.font)
+        log_status = "LOG: " + (
+            os.path.basename(self.state.db_log.filename)[:13]
+            if self.state.db_log
+            else "EN ESPERA"
+        )
+        log_status = log_status if not self.state.geotag else self.state.geotag
+        color = "red" if self.state.db_log else "white"
+        self.draw.text(self.log_pos, log_status, font=self.font, fill=color)
 
         # Camera status
-        self.draw.text(self.cam_pos, "CAM: DSC0001.JPG", fill="WHITE", font=self.font)
+        photo_text = "CAM: " + (
+            "PROCESANDO FOTO..." if self.state.photo.is_busy else self.state.photo.name
+        )
+        self.draw.text(self.cam_pos, photo_text, fill="WHITE", font=self.font)
 
         # Time
         self.draw.text(
@@ -148,6 +163,7 @@ class OledView:
         while True:
             self.update_view()
             time.sleep(0.1)
+
 
 if __name__ == "__main__":
     oled_display = OledView({})
